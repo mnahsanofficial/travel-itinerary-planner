@@ -1,13 +1,12 @@
-
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '../views/Home.vue';
-import Login from '../views/Login.vue';
-import Signup from '../views/Signup.vue';
+import HomeView from '../views/HomeView.vue';
+import LoginView from '../views/LoginView.vue';
+import SignupView from '../views/SignupView.vue';
 
 const routes = [
-  { path: '/', name: 'Home', component: Home },
-  { path: '/login', name: 'Login', component: Login },
-  { path: '/signup', name: 'Signup', component: Signup }
+  { path: '/', name: 'HomeView', component: HomeView },
+  { path: '/login', name: 'LoginView', component: LoginView },
+  { path: '/signup', name: 'SignupView', component: SignupView }
 ];
 
 const router = createRouter({
