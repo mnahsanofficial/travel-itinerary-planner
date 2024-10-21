@@ -1,12 +1,26 @@
 <template>
   <div id="app">
-    <ItineraryForm
-      v-if="isFormVisible"
-      :initialItinerary="editingItinerary"
-      :isEditing="isEditing"
-      @submit="handleFormSubmit"
-    />
-    <button @click="toggleForm">{{ isFormVisible ? 'Cancel' : 'Add New Itinerary' }}</button>
+    <div class="form-container" v-if="isFormVisible">
+      <ItineraryForm
+        :initialItinerary="editingItinerary"
+        :isEditing="isEditing"
+        @submit="handleFormSubmit"
+      />
+      <Button
+        label="Cancel"
+        class="p-button-text p-button-secondary p-ml-2"
+        @click="toggleForm"
+      />
+    </div>
+    <div class="actions">
+      <Button
+        label="Add New Itinerary"
+        icon="pi pi-plus"
+        class="p-button-primary"
+        @click="toggleForm"
+        v-if="!isFormVisible"
+      />
+    </div>
     <ItineraryList @edit="startEditingItinerary" />
   </div>
 </template>
@@ -15,11 +29,13 @@
 import ItineraryForm from './components/ItineraryForm.vue';
 import ItineraryList from './components/ItineraryList.vue';
 import { store } from './store';
+import Button from 'primevue/button';
 
 export default {
   components: {
     ItineraryForm,
-    ItineraryList
+    ItineraryList,
+    Button
   },
   data() {
     return {
@@ -57,31 +73,25 @@ export default {
   }
 };
 </script>
-<style>
+
+<style scoped>
 #app {
   max-width: 800px;
   margin: auto;
   padding: 20px;
 }
 
-form input, form textarea {
-  display: block;
-  width: 100%;
-  margin-bottom: 10px;
+.form-container {
+  margin-bottom: 20px;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
-li {
-  margin-bottom: 10px;
-  border: 1px solid #ddd;
-  padding: 10px;
-}
-
-button {
-  margin-right: 5px;
+.p-button {
+  margin: 0 5px;
 }
 </style>
