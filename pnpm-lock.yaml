@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@primevue/themes':
+    specifier: ^4.1.1
+    version: 4.1.1
   '@vitejs/plugin-vue':
     specifier: ^5.1.4
     version: 5.1.4(vite@5.4.9)(vue@3.5.12)
@@ -17,6 +20,12 @@ dependencies:
   firebase:
     specifier: ^10.14.1
     version: 10.14.1
+  primeicons:
+    specifier: ^7.0.0
+    version: 7.0.0
+  primevue:
+    specifier: ^4.1.1
+    version: 4.1.1(vue@3.5.12)
   vite-plugin-vuetify:
     specifier: ^2.0.4
     version: 2.0.4(vite@5.4.9)(vue@3.5.12)(vuetify@3.7.3)
@@ -2045,6 +2054,46 @@ packages:
   /@polka/url@1.0.0-next.28:
     resolution: {integrity: sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw==}
     dev: true
+
+  /@primeuix/styled@0.2.0:
+    resolution: {integrity: sha512-3Q6bDrmwTW88tzJsFIFenC0VyXLj0+/wYw+TZnJ/4CCDfehR4WfTs4EZdpuFtYqvmbpJ6zWXAiwSCNdSYTZkyA==}
+    engines: {node: '>=12.11.0'}
+    dependencies:
+      '@primeuix/utils': 0.2.0
+    dev: false
+
+  /@primeuix/utils@0.2.0:
+    resolution: {integrity: sha512-AaDIeRFlsbkVTk2s0mlEjnGSLi31X669NVwo+n+AVAnBdDiQznjipNTpHbOobVBtjOKZize74PChK6uoaSBRUw==}
+    engines: {node: '>=12.11.0'}
+    dev: false
+
+  /@primevue/core@4.1.1(vue@3.5.12):
+    resolution: {integrity: sha512-jUDrTh3g0FskTdD6rCCsoWfxKky0R7959p7vnaNYI6wMLreaTL3yC3nzYlEniIpb+F51Sm3KJ1eSJBN6DnSB8Q==}
+    engines: {node: '>=12.11.0'}
+    peerDependencies:
+      vue: ^3.0.0
+    dependencies:
+      '@primeuix/styled': 0.2.0
+      '@primeuix/utils': 0.2.0
+      vue: 3.5.12
+    dev: false
+
+  /@primevue/icons@4.1.1(vue@3.5.12):
+    resolution: {integrity: sha512-Ybeb+AHUsVybITuYNwS7goqWcXLLgCDSiCPoymyYwYkzn5qLakvJbQH1EX8lGOsrvqK0hG+s+n7Wm2MHJ8A72w==}
+    engines: {node: '>=12.11.0'}
+    dependencies:
+      '@primeuix/utils': 0.2.0
+      '@primevue/core': 4.1.1(vue@3.5.12)
+    transitivePeerDependencies:
+      - vue
+    dev: false
+
+  /@primevue/themes@4.1.1:
+    resolution: {integrity: sha512-ec2gBN2vP0ydGtGAzC0nYCFqYN7CzvXxnlJqcvcPIo3rP/pcdj+FkzAe3y2DMG3OorYtqdzoyGtBefQrx3v5ag==}
+    engines: {node: '>=12.11.0'}
+    dependencies:
+      '@primeuix/styled': 0.2.0
+    dev: false
 
   /@protobufjs/aspromise@1.1.2:
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
@@ -6669,6 +6718,22 @@ packages:
       lodash: 4.17.21
       renderkid: 3.0.0
     dev: true
+
+  /primeicons@7.0.0:
+    resolution: {integrity: sha512-jK3Et9UzwzTsd6tzl2RmwrVY/b8raJ3QZLzoDACj+oTJ0oX7L9Hy+XnVwgo4QVKlKpnP/Ur13SXV/pVh4LzaDw==}
+    dev: false
+
+  /primevue@4.1.1(vue@3.5.12):
+    resolution: {integrity: sha512-FeJkv7FhfePfUBoApW0qAhid6Znq18VgbGFZdmhUcxvOD49Y2Eo/k2Yn7ypPhRbRApWiaSRN0v/2G1I4AMj3xg==}
+    engines: {node: '>=12.11.0'}
+    dependencies:
+      '@primeuix/styled': 0.2.0
+      '@primeuix/utils': 0.2.0
+      '@primevue/core': 4.1.1(vue@3.5.12)
+      '@primevue/icons': 4.1.1(vue@3.5.12)
+    transitivePeerDependencies:
+      - vue
+    dev: false
 
   /process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
