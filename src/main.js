@@ -2,6 +2,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 //import vuetify from './plugins/vuetify';
 import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
 
 // Import PrimeVue styles
 // import 'primevue/resources/themes/saga-blue/theme.css'; // Choose your theme
@@ -23,6 +24,7 @@ app.use(PrimeVue, {
         preset: Aura
     }
 });
+app.use(ToastService)
 
 // Register PrimeVue components globally if needed
 app.component('AutoComplete', AutoComplete);
