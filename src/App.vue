@@ -8,8 +8,8 @@
       />
       <Button
         label="Cancel"
-        class="p-button-text p-button-secondary p-ml-2"
-        @click="toggleForm"
+        class="p-button-secondary p-ml-2"
+        @click="cancelEdit"
       />
     </div>
     <div class="actions">
@@ -17,7 +17,7 @@
         label="Add New Itinerary"
         icon="pi pi-plus"
         class="p-button-primary"
-        @click="toggleForm"
+        @click="startAddingNewItinerary"
         v-if="!isFormVisible"
       />
     </div>
@@ -46,26 +46,40 @@ export default {
   },
   computed: {
     editingItinerary() {
-      return this.isEditing ? { ...store.itineraries[this.editingIndex] } : {};
+      // When editing, return a copy of the selected itinerary
+      // Otherwise, return an empty object for adding a new itinerary
+      return this.isEditing && this.editingIndex !== null
+        ? { ...store.itineraries[this.editingIndex] }
+        : {};
     }
   },
   methods: {
-    toggleForm() {
-      this.isFormVisible = !this.isFormVisible;
-      if (!this.isFormVisible) {
-        this.isEditing = false;
-        this.editingIndex = null;
-      }
+    startAddingNewItinerary() {
+      // Set form state for adding a new itinerary
+      this.isEditing = false;
+      this.editingIndex = null;
+      this.isFormVisible = true;
+    },
+    cancelEdit() {
+      // Reset form state when canceling
+      this.isFormVisible = false;
+      this.isEditing = false;
+      this.editingIndex = null;
     },
     handleFormSubmit(itinerary) {
-      if (this.isEditing) {
+      // Handle form submission for adding or editing an itinerary
+      if (this.isEditing && this.editingIndex !== null) {
         store.updateItinerary(this.editingIndex, itinerary);
       } else {
         store.addItinerary(itinerary);
       }
-      this.toggleForm();
+      // Reset form state after submission
+      this.isFormVisible = false;
+      this.isEditing = false;
+      this.editingIndex = null;
     },
     startEditingItinerary(index) {
+      // Set form state for editing the selected itinerary
       this.isEditing = true;
       this.editingIndex = index;
       this.isFormVisible = true;

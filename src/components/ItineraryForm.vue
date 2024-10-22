@@ -20,11 +20,36 @@
           v-model="itinerary.location"
           id="location"
           :suggestions="locationSuggestions"
+          field="display_name"
           placeholder="Search Location"
           @complete="fetchLocationSuggestions"
+          @select="onLocationSelect"
           required
           class="p-inputtext-lg custom-input"
         />
+      </div>
+
+      <!-- Map Display -->
+      <div v-if="mapUrl" class="map-container">
+        <h4>Map</h4>
+        <iframe
+          :src="mapUrl"
+          width="100%"
+          height="300"
+          style="border:0;"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+
+      <!-- Weather Display -->
+      <div v-if="weather" class="weather-container">
+        <h4>Weather Information</h4>
+        <p>Location: {{ weather.name }}</p>
+        <p>Temperature: {{ weather.main.temp }}°C</p>
+        <p>Weather: {{ weather.weather[0].description }}</p>
+        <p>Humidity: {{ weather.main.humidity }}%</p>
       </div>
 
       <!-- Date Picker -->
@@ -38,6 +63,29 @@
           class="p-inputtext-lg custom-input"
           placeholder="Select a date"
           required
+        />
+      </div>
+
+      <!-- Accommodation Input Field -->
+      <div class="p-field">
+        <label for="accommodation">Accommodation</label>
+        <InputText
+          v-model="itinerary.accommodation"
+          id="accommodation"
+          placeholder="Enter Accommodation Details"
+          class="p-inputtext-lg custom-input"
+        />
+      </div>
+
+      <!-- Budget Input Field -->
+      <div class="p-field">
+        <label for="budget">Estimated Budget (USD)</label>
+        <InputText
+          v-model="itinerary.budget"
+          id="budget"
+          type="number"
+          placeholder="Enter Estimated Budget"
+          class="p-inputtext-lg custom-input"
         />
       </div>
 
@@ -58,9 +106,12 @@
       <div class="p-field p-mt-3">
         <Button
           label=""
+          :loading="isSubmitting"
           class="p-button-success p-button-lg submit-button"
           type="submit"
-        > {{ isEditing ? 'Update' : 'Add' }}</Button>
+        >
+          {{ isEditing ? 'Update' : 'Add' }}
+        </Button>
       </div>
     </form>
   </div>
@@ -72,6 +123,7 @@ import InputText from 'primevue/inputtext';
 import Calendar from 'primevue/calendar';
 import Textarea from 'primevue/textarea';
 import Button from 'primevue/button';
+import { useToast } from 'primevue/usetoast';
 import axios from 'axios';
 
 export default {
@@ -85,7 +137,14 @@ export default {
   props: {
     initialItinerary: {
       type: Object,
-      default: () => ({ title: '', location: '', date: '', description: '' }),
+      default: () => ({
+        title: '',
+        location: '',
+        date: '',
+        description: '',
+        accommodation: '',
+        budget: null,
+      }),
     },
     isEditing: {
       type: Boolean,
@@ -97,7 +156,23 @@ export default {
       itinerary: { ...this.initialItinerary },
       locationSuggestions: [],
       isSubmitting: false,
+      mapUrl: null,
+      weather: null,
+      toast: useToast(),
     };
+  },
+  watch: {
+    initialItinerary: {
+      handler(newVal) {
+        this.itinerary = { ...newVal };
+        if (newVal.lat && newVal.lon) {
+          this.mapUrl = `https://maps.locationiq.com/v3/staticmap?key=${process.env.VUE_APP_LocationIQ_API}&center=${newVal.lat},${newVal.lon}&zoom=12&size=600x300&format=png`;
+          this.fetchWeather(newVal.lat, newVal.lon);
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   methods: {
     async fetchLocationSuggestions(event) {
@@ -113,29 +188,82 @@ export default {
       try {
         const response = await axios.get(url);
         this.locationSuggestions = response.data.map((suggestion) => {
-          // Extract the last two components from the display_name
-          const parts = suggestion.display_name.split(',').map(part => part.trim());
-          const lastTwoParts = parts.slice(-10).join(', ');
-          return lastTwoParts;
+          this.onLocationSelect(suggestion)
+          // Extract the relevant parts of the display name
+          return suggestion.display_name.split(',').slice(-10).join(', ').trim()
+          
         });
       } catch (error) {
         console.error('Error fetching location suggestions:', error);
         this.locationSuggestions = [];
       }
+    
     },
-    submitForm() {
-      this.$emit('submit', { ...this.itinerary });
-      this.resetForm();
+    async onLocationSelect(selectedLocation) {
+      this.itinerary.location = selectedLocation.display_name;
+      const { lat, lon } = selectedLocation;
+      this.itinerary.lat = lat;
+      this.itinerary.lon = lon;
+      this.mapUrl = `https://maps.locationiq.com/v3/staticmap?key=${process.env.VUE_APP_LocationIQ_API}&center=${lat},${lon}&zoom=12&size=600x300&format=png`;
+      await this.fetchWeather(lat, lon);
+    },
+    async fetchWeather(lat, lon) {
+      //const apiKey = 'your-openweather-api-key';
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&&appid=d9d9ece2461c1a6f6a1292895ebd6e0d`;
+
+
+      try {
+        const response = await axios.get(url);
+        this.weather = response.data;
+      } catch (error) {
+        console.error('Error fetching weather information:', error);
+        this.weather = null;
+      }
+    },
+    async submitForm() {
+      // Prevent multiple submissions
+      if (this.isSubmitting) {
+        return;
+      }
+
+      this.isSubmitting = true;
+      try {
+        await this.$emit('submit', { ...this.itinerary });
+        this.showToastMessage('success', this.isEditing ? 'Itinerary updated successfully.' : 'Itinerary added successfully.');
+        this.resetForm();
+      } catch (error) {
+        this.showToastMessage('error', 'An error occurred. Please try again.');
+      } finally {
+        this.isSubmitting = false;
+      }
     },
     resetForm() {
-      this.itinerary = { title: '', location: '', date: '', description: '' };
+      this.itinerary = {
+        title: '',
+        location: '',
+        date: '',
+        description: '',
+        accommodation: '',
+        budget: null,
+        lat: null,
+        lon: null,
+      };
+      this.mapUrl = null;
+      this.weather = null;
       if (this.$refs.formRef) {
-    this.$refs.formRef.reset(); // Reset the form fields using Vue's native form reset method
-  }
+        this.$refs.formRef.reset();
+      }
+    },
+    showToastMessage(severity, message) {
+      this.toast.add({ severity, summary: severity === 'success' ? 'Success' : 'Error', detail: message, life: 3000 });
     },
   },
 };
 </script>
+
+
+
+
 
 <style scoped>
 .form-container {
@@ -199,13 +327,27 @@ label {
   border-color: #1e7e34;
 }
 
-.p-fluid .p-field {
-  margin-bottom: 1.5rem;
+.map-container {
+  margin-top: 1.5rem;
 }
 
-textarea.custom-input {
-  resize: vertical;
+.weather-container {
+  margin-top: 1.5rem;
+  background: #f0f0f0;
+  padding: 1rem;
+  border-radius: 8px;
 }
+.accommodation-container, .budget-container {
+  margin-top: 1.5rem;
+  background: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.accommodation-container h4, .budget-container h4 {
+  margin-bottom: 0.5rem;
+}
+
 
 @media (max-width: 768px) {
   .form-container {
@@ -217,4 +359,3 @@ textarea.custom-input {
   }
 }
 </style>
-

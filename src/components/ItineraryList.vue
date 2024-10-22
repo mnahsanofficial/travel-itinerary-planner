@@ -1,6 +1,7 @@
 <template>
   <div class="itinerary-container">
     <h2>Itineraries</h2>
+    <Toast ref="toast" /> <!-- Add the Toast component -->
     <div class="p-list p-mt-2">
       <div
         v-for="(itinerary, index) in itineraries"
@@ -18,17 +19,31 @@
                 <Button
                   icon="pi pi-pencil"
                   class="p-button-rounded p-button-text p-button-primary"
-                  @click="editItinerary(index)"
+                  @click="startEditingItinerary(index)"
                 />
                 <Button
                   icon="pi pi-trash"
                   class="p-button-rounded p-button-text p-button-danger"
                   @click="deleteItinerary(index)"
                 />
+                <Button
+                  icon="pi pi-share-alt"
+                  class="p-button-rounded p-button-text p-button-info"
+                  @click="shareItinerary(itinerary)"
+                />
+                <Button
+                  icon="pi pi-file-pdf"
+                  class="p-button-rounded p-button-text p-button-warning"
+                  @click="exportToPDF(itinerary)"
+                />
               </div>
             </div>
           </template>
           <p>{{ itinerary.description }}</p>
+          <div v-if="itinerary.accommodation || itinerary.budget">
+            <p v-if="itinerary.accommodation"><strong>Accommodation:</strong> {{ itinerary.accommodation }}</p>
+            <p v-if="itinerary.budget"><strong>Budget:</strong> ${{ itinerary.budget }}</p>
+          </div>
         </Card>
       </div>
     </div>
@@ -39,29 +54,74 @@
 import { store } from '../store';
 import Card from 'primevue/card';
 import Button from 'primevue/button';
+import Toast from 'primevue/toast'; // Import Toast component
+import { useToast } from 'primevue/usetoast'; // Import Toast hook
+import jsPDF from 'jspdf';
 
 export default {
   components: {
     Card,
     Button,
+    Toast, // Add Toast component
   },
   data() {
     return {
       itineraries: store.itineraries,
+      toast: useToast(), // Initialize the Toast
     };
   },
   methods: {
     deleteItinerary(index) {
       store.removeItinerary(index);
+      this.showSuccessMessage('Itinerary deleted successfully.');
     },
-    editItinerary(index) {
+    startEditingItinerary(index) {
       this.$emit('edit', index);
+    },
+    finishEditingItinerary() {
+      this.showSuccessMessage('Itinerary updated successfully.');
     },
     // Method to format the date
     formatDate(date) {
       if (!date) return '';
       const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
       return new Date(date).toLocaleDateString('en-US', options);
+    },
+    shareItinerary(itinerary) {
+      const shareText = `Itinerary: ${itinerary.title}
+      Location: ${itinerary.location}
+      Date: ${this.formatDate(itinerary.date)}
+      Description: ${itinerary.description}
+      Accommodation: ${itinerary.accommodation || 'N/A'}
+      Budget: ${itinerary.budget || 'N/A'} USD`;
+
+      if (navigator.share) {
+        navigator.share({
+          title: 'Itinerary Details',
+          text: shareText,
+        }).catch(error => {
+          console.error('Error sharing:', error);
+        });
+      } else {
+        alert('Sharing is not supported in this browser.');
+      }
+    },
+    exportToPDF(itinerary) {
+      const doc = new jsPDF();
+      const itineraryData = `
+        Itinerary: ${itinerary.title}
+        Location: ${itinerary.location}
+        Date: ${this.formatDate(itinerary.date)}
+        Description: ${itinerary.description}
+        Accommodation: ${itinerary.accommodation || 'N/A'}
+        Budget: ${itinerary.budget || 'N/A'} USD
+      `;
+
+      doc.text(itineraryData, 10, 10);
+      doc.save(`${itinerary.title}_Itinerary.pdf`);
+    },
+    showSuccessMessage(message) {
+      this.toast.add({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
     }
   },
 };
