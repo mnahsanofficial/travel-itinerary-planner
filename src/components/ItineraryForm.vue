@@ -208,8 +208,8 @@ export default {
       await this.fetchWeather(lat, lon);
     },
     async fetchWeather(lat, lon) {
-      //const apiKey = 'your-openweather-api-key';
-      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&&appid=d9d9ece2461c1a6f6a1292895ebd6e0d`;
+      const apiKey = process.env.VUE_APP_OpenWeatherMap_API;
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&&appid=${apiKey}`;
 
 
       try {
